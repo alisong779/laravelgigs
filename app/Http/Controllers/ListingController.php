@@ -46,6 +46,6 @@ class ListingController extends Controller
 
         Listing::create($formFields);
 
-        return redirect('/');
+        return redirect('/')->with('success', 'Listing created successfully!');
     }
 }
