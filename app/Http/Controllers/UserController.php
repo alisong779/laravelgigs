@@ -1,5 +1,6 @@
 <?php
 
+
 namespace App\Http\Controllers;
 
 use App\Models\User;
@@ -8,36 +9,34 @@ use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
-    //Show Register Create Form
+    // Show Register/Create Form
     public function create()
     {
         return view('users.register');
     }
 
-    //Create new User
+    // Create New User
     public function store(Request $request)
     {
         $formFields = $request->validate([
             'name' => ['required', 'min:3'],
             'email' => ['required', 'email', Rule::unique('users', 'email')],
             'password' => 'required|confirmed|min:6'
-
         ]);
 
-        //Hash password with bcrypt
+        // Hash Password
         $formFields['password'] = bcrypt($formFields['password']);
 
-        //Create the user
+        // Create User
         $user = User::create($formFields);
 
-        //Log the user in
+        // Login
         auth()->login($user);
 
-        //Redirect
-        return redirect('/')->with('success', 'User created and logged in!');
+        return redirect('/')->with('message', 'User created and logged in');
     }
 
-    //Logout User
+    // Logout User
     public function logout(Request $request)
     {
         auth()->logout();
@@ -45,19 +44,18 @@ class UserController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/')->with('success', 'Logged out!');
+        return redirect('/')->with('message', 'You have been logged out!');
     }
 
-    //Show Login Form
+    // Show Login Form
     public function login()
     {
         return view('users.login');
     }
 
-    //Login User
+    // Authenticate User
     public function authenticate(Request $request)
     {
-
         $formFields = $request->validate([
             'email' => ['required', 'email'],
             'password' => 'required'
@@ -66,7 +64,7 @@ class UserController extends Controller
         if (auth()->attempt($formFields)) {
             $request->session()->regenerate();
 
-            return redirect('/')->with('success', 'You are logged in!');
+            return redirect('/')->with('message', 'You are now logged in!');
         }
 
         return back()->withErrors(['email' => 'Invalid Credentials'])->onlyInput('email');
